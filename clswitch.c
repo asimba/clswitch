@@ -23,17 +23,18 @@ LRESULT CALLBACK WndProc(HWND ihwnd, UINT umsg, WPARAM wParam, LPARAM lParam) {
 	else return DefWindowProc(ihwnd, umsg, wParam, lParam);
 }
 
-int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
-	LPSTR lpCmdLine, int nCmdShow) {
+extern "C" void startup(void) {
+	HINSTANCE hInstance=GetModuleHandle(NULL);
+	SetProcessWorkingSetSize(GetCurrentProcess(), (SIZE_T) -1, (SIZE_T) -1);
+	HWND hwnd;
+	WNDCLASS wc = {};
 	LPCSTR cl_name = (LPCSTR)"capsfinder";
 	SetLastError(0);
 	HANDLE iMutex = CreateMutex(NULL, TRUE, cl_name);
 	if (iMutex) {
-		if (GetLastError() == ERROR_ALREADY_EXISTS) return 0;
+		if (GetLastError() == ERROR_ALREADY_EXISTS) goto return_point_0;
 	}
-	else return 0;
-	HWND hwnd;
-	WNDCLASS wc = {};;
+	else goto return_point_0;
 	wc.lpfnWndProc = WndProc;
 	wc.hInstance = hInstance;
 	wc.lpszClassName = cl_name;
@@ -50,5 +51,6 @@ return_point_2:
 	UnregisterClass(cl_name, hInstance);
 return_point_1:
 	CloseHandle(iMutex);
-	return 0;
+return_point_0:
+    ExitProcess(0);
 }
